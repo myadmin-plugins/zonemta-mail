@@ -50,7 +50,7 @@ class Plugin
 		 * @var \ServiceHandler $subject
 		 */
 		//$subject = $event->getSubject();
-		api_register('api_auto_directadmin_storage_login', ['id' => 'int'], ['return' => 'result_status'], 'Logs into ZoneMTA for the given backup id and returns a unique logged-in url.  The status will be "ok" if successful, or "error" if there was any problems status_text will contain a description of the problem if any.');
+		api_register('api_auto_zonemta_login', ['id' => 'int'], ['return' => 'result_status'], 'Logs into ZoneMTA for the given backup id and returns a unique logged-in url.  The status will be "ok" if successful, or "error" if there was any problems status_text will contain a description of the problem if any.');
 	}
 
 	/**
