@@ -50,7 +50,7 @@ class Plugin
 		 * @var \ServiceHandler $subject
 		 */
 		//$subject = $event->getSubject();
-		api_register('api_auto_zonemta_login', ['id' => 'int'], ['return' => 'result_status'], 'Logs into ZoneMTA for the given backup id and returns a unique logged-in url.  The status will be "ok" if successful, or "error" if there was any problems status_text will contain a description of the problem if any.');
+		api_register('api_auto_zonemta_login', ['id' => 'int'], ['return' => 'result_status'], 'Logs into ZoneMTA for the given mail id and returns a unique logged-in url.  The status will be "ok" if successful, or "error" if there was any problems status_text will contain a description of the problem if any.');
 	}
 
 	/**
@@ -65,58 +65,22 @@ class Plugin
 			$serviceTypes = run_event('get_service_types', false, self::$module);
 			$settings = get_module_settings(self::$module);
 			$extra = run_event('parse_service_extra', $serviceClass->getExtra(), self::$module);
-			$serverdata = get_service_master($serviceClass->getServer(), self::$module);
-			$hash = $serverdata[$settings['PREFIX'].'_key'];
-			$ip = $serverdata[$settings['PREFIX'].'_ip'];
-			$hostname = 'st'.$serviceClass->getId().'.ispot.cc';
-			$password = backup_get_password($serviceClass->getId());
-			$username = 'st'.$serviceClass->getId();
-			if (in_array('reseller', explode(',', $event['field1']))) {
-				$reseller = true;
-				$apiCmd = '/CMD_API_ACCOUNT_RESELLER';
-				$siteIp = 'shared';
-			} else {
-				$reseller = false;
-				$apiCmd = '/CMD_API_ACCOUNT_USER';
-				$siteIp = $ip;
-			}
-			$server_ssl="Y";
-			$sock = new HTTPSocket;
-			$sock->connect(($server_ssl == 'Y' ? 'ssl://' : '').$ip, 2222);
-			$sock->set_login('admin',$hash);
-			$sock->query('/CMD_API_SHOW_RESELLER_IPS');
-			$result = $sock->fetch_parsed_body();
-			if (!in_array($siteIp, $result['list'])) {
-				$siteIp = $result['list'][0];
-			}
-			$apiOptions = [
-				'action' => 'create',
-				'add' => 'Submit',
+			//$serverdata = get_service_master($serviceClass->getServer(), self::$module);
+			$password = mail_get_password($serviceClass->getId());
+			$username = 'mb'.$serviceClass->getId();
+			$client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
+			$users = $client->selectDatabase('zone-mta')->selectCollection('users');
+			$data = [
 				'username' => $username,
-				'email' => $event['email'],
-				'passwd' => $password,
-				'passwd2' => $password,
-				'domain' => $hostname,
-				'ip' => $siteIp,
-				'notify' => 'yes'
+				'password' => $password,
 			];
-			if (strpos($serviceTypes[$serviceClass->getType()]['services_field2'], ',') === false) {
-				$apiOptions['package'] = $serviceTypes[$serviceClass->getType()]['services_field2'];
-			} else {
-				$fields = explode(',', $serviceTypes[$serviceClass->getType()]['services_field2']);
-				foreach ($fields as $field) {
-					list($key, $value) = explode('=', $field);
-					$apiOptions[$key] = $value;
-				}
-			}
-			$sock->query($apiCmd, $apiOptions);
-			$result = $sock->fetch_parsed_body();
-			request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'directadmin', $apiCmd, $apiOptions, $result, $serviceClass->getId());
-			myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' '.json_encode($apiOptions).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-			if ($result['error'] != "0")
+			$result = $users->insertOne($data);
+			request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', 'insert', $data, $result, $serviceClass->getId());
+			myadmin_log('myadmin', 'info', 'ZoneMTA insert '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+			if ($insertOneResult->getInsertedCount() == 0)
 			{
 				$event['success'] = false;
-				myadmin_log('directadmin', 'error', 'Error Creating User '.$username.' Site '.$hostname.' Text:'.$result['text'].' Details:'.$result['details'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
+				myadmin_log('zonemta', 'error', 'Error Creating User '.$username.' Site '.$hostname.' Text:'.$result['text'].' Details:'.$result['details'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				$event->stopPropagation();
 				return;
 			}
@@ -131,58 +95,10 @@ class Plugin
 					}
 				}
 			} */
-			if (mb_substr($result['result'][0]['statusmsg'], 0, 19) == 'Sorry, the password') {
-				while (mb_substr($result['result'][0]['statusmsg'], 0, 19) == 'Sorry, the password') {
-					$password = generateRandomString(10, 2, 2, 2, 1);
-					$apiOptions['passwd'] = $password;
-					$apiOptions['passwd2'] = $password;
-					myadmin_log('myadmin', 'info', "Trying Password {$apiOptions['password']}", __LINE__, __FILE__, self::$module, $serviceClass->getId());
-					$sock->query($apiCmd, $apiOptions);
-					$result = $sock->fetch_parsed_body();
-					request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'directadmin', $apiCmd, $apiOptions, $result, $serviceClass->getId());
-					myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-					if ($result['error'] != "0")
-					{
-					}
-				}
-				$GLOBALS['tf']->history->add($settings['PREFIX'], 'password', $serviceClass->getId(), $options['password']);
-			}
-			if ($result['result'][0]['statusmsg'] == 'Sorry, a group for that username already exists.') {
-				while ($result['result'][0]['statusmsg'] == 'Sorry, a group for that username already exists.') {
-					$username .= 'a';
-					$username = mb_substr($username, 1);
-					$apiOptions['username'] = $username;
-					myadmin_log('myadmin', 'info', 'Trying Username '.$apiOptions['username'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
-					$sock->query($apiCmd, $apiOptions);
-					$result = $sock->fetch_parsed_body();
-					request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'directadmin', $apiCmd, $apiOptions, $result, $serviceClass->getId());
-					myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-					if ($result['error'] != "0")
-					{
-					}
-				}
-			}
-			if (preg_match("/^.*This system already has an account named .{1,3}{$username}.{1,3}\.$/m", $result['result'][0]['statusmsg']) || preg_match('/^.*The name of another account on this server has the same initial/m', $result['result'][0]['statusmsg'])) {
-				while (preg_match("/^.*This system already has an account named .{1,3}{$username}.{1,3}\.$/m", $result['result'][0]['statusmsg']) || preg_match('/^.*The name of another account on this server has the same initial/m', $result['result'][0]['statusmsg'])) {
-					$username .= 'a';
-					$username = mb_substr($username, 1);
-					$apiOptions['username'] = $username;
-					myadmin_log('myadmin', 'info', 'Trying Username '.$apiOptions['username'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
-					$sock->query($apiCmd, $apiOptions);
-					$result = $sock->fetch_parsed_body();
-					request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'directadmin', $apiCmd, $apiOptions, $result, $serviceClass->getId());
-					myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-					if ($result['error'] != "0")
-					{
-					}
-				}
-			}
 			$db = get_module_db(self::$module);
 			$username = $db->real_escape($username);
-			$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_ip='{$siteIp}', {$settings['PREFIX']}_username='{$username}' where {$settings['PREFIX']}_id='{$serviceClass->getId()}'", __LINE__, __FILE__);
-			backup_welcome_email($serviceClass->getId());
-			function_requirements('add_dns_record');
-			$result = add_dns_record(14426, 'st'.$serviceClass->getId(), $siteIp, 'A', 86400, 0, true);
+			$db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_username='{$username}' where {$settings['PREFIX']}_id='{$serviceClass->getId()}'", __LINE__, __FILE__);
+			mail_welcome_email($serviceClass->getId());
 			$event['success'] = true;
 			$event->stopPropagation();
 		}
@@ -212,7 +128,7 @@ class Plugin
 			];
 			$sock->query($apiCmd, $apiOptions);
 			$result = $sock->fetch_parsed_body();
-			request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'directadmin', $apiCmd, $apiOptions, $result, $serviceClass->getId());
+			request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', $apiCmd, $apiOptions, $result, $serviceClass->getId());
 			myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			$event->stopPropagation();
 		}
@@ -244,7 +160,7 @@ class Plugin
 				];
 				$sock->query($apiCmd, $apiOptions);
 				$result = $sock->fetch_parsed_body();
-				request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'directadmin', $apiCmd, $apiOptions, $result, $serviceClass->getId());
+				request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', $apiCmd, $apiOptions, $result, $serviceClass->getId());
 				myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			}
 			$event->stopPropagation();
@@ -278,7 +194,7 @@ class Plugin
 				];
 				$sock->query($apiCmd, $apiOptions);
 				$result = $sock->fetch_parsed_body();
-				request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'directadmin', $apiCmd, $apiOptions, $result, $serviceClass->getId());
+				request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', $apiCmd, $apiOptions, $result, $serviceClass->getId());
 				myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			}
 			$event->stopPropagation();
@@ -302,9 +218,9 @@ class Plugin
 		if (in_array($event['type'], [get_service_define('ZONEMTA_MAIL')])) {
 			$serviceClass = $event->getSubject();
 			$settings = get_module_settings(self::$module);
-			$directadmin = new ZoneMTA(FANTASTICO_USERNAME, FANTASTICO_PASSWORD);
+			$zonemta = new ZoneMTA(FANTASTICO_USERNAME, FANTASTICO_PASSWORD);
 			myadmin_log('myadmin', 'info', 'IP Change - (OLD:'.$serviceClass->getIp().") (NEW:{$event['newip']})", __LINE__, __FILE__, self::$module, $serviceClass->getId());
-			$result = $directadmin->editIp($serviceClass->getIp(), $event['newip']);
+			$result = $zonemta->editIp($serviceClass->getIp(), $event['newip']);
 			if (isset($result['faultcode'])) {
 				myadmin_log('myadmin', 'error', 'ZoneMTA editIp('.$serviceClass->getIp().', '.$event['newip'].') returned Fault '.$result['faultcode'].': '.$result['fault'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				$event['status'] = 'error';
