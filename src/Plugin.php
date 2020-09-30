@@ -59,7 +59,7 @@ class Plugin
 	 */
 	public static function getActivate(GenericEvent $event)
 	{
-		if (in_array($event['type'], [get_service_define('ZONEMTA_MAIL')])) {
+		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			$serviceClass = $event->getSubject();
 			myadmin_log('myadmin', 'info', 'ZoneMTA Activation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			$serviceTypes = run_event('get_service_types', false, self::$module);
@@ -110,7 +110,7 @@ class Plugin
 	 */
 	public static function getReactivate(GenericEvent $event)
 	{
-		if (in_array($event['type'], [get_service_define('ZONEMTA_MAIL')])) {
+		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			$serviceClass = $event->getSubject();
 			$settings = get_module_settings(self::$module);
 			$serverdata = get_service_master($serviceClass->getServer(), self::$module);
@@ -140,7 +140,7 @@ class Plugin
 	 */
 	public static function getDeactivate(GenericEvent $event)
 	{
-		if (in_array($event['type'], [get_service_define('ZONEMTA_MAIL')])) {
+		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			$serviceClass = $event->getSubject();
 			myadmin_log('myadmin', 'info', 'ZoneMTA Deactivation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			$settings = get_module_settings(self::$module);
@@ -175,7 +175,7 @@ class Plugin
 	public static function getTerminate(GenericEvent $event)
 	{
 		$serviceClass = $event->getSubject();
-		if (in_array($event['type'], [get_service_define('ZONEMTA_MAIL')])) {
+		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			myadmin_log('myadmin', 'info', 'ZoneMTA Termination', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			$settings = get_module_settings(self::$module);
 			$serverdata = get_service_master($serviceClass->getServer(), self::$module);
@@ -215,7 +215,7 @@ class Plugin
 	 */
 	public static function getChangeIp(GenericEvent $event)
 	{
-		if (in_array($event['type'], [get_service_define('ZONEMTA_MAIL')])) {
+		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			$serviceClass = $event->getSubject();
 			$settings = get_module_settings(self::$module);
 			$zonemta = new ZoneMTA(FANTASTICO_USERNAME, FANTASTICO_PASSWORD);
