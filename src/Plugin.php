@@ -118,23 +118,29 @@ class Plugin
 		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			$serviceClass = $event->getSubject();
 			$settings = get_module_settings(self::$module);
-			$serverdata = get_service_master($serviceClass->getServer(), self::$module);
-			$hash = $serverdata[$settings['PREFIX'].'_key'];
-			$ip = $serverdata[$settings['PREFIX'].'_ip'];
-			$server_ssl="Y";
-			$sock = new HTTPSocket;
-			$sock->connect(($server_ssl == 'Y' ? 'ssl://' : '').$ip, 2222);
-			$sock->set_login('admin',$hash);
-			$apiCmd = '/CMD_API_SELECT_USERS';
-			$apiOptions = [
-				'location' => 'CMD_SELECT_USERS',
-				'suspend' => 'Unsuspend',
-				'select0' => $serviceClass->getUsername()
+			$username = $serviceClass->getUsername() == '' ? 'mb'.$serviceClass->getId() : $serviceClass->getUsername();
+			$password = mail_get_password($serviceClass->getId());
+			$client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
+			$users = $client->selectDatabase('zone-mta')->selectCollection('users');
+			$data = [
+				'username' => $username,
+				'password' => $password,
 			];
-			$sock->query($apiCmd, $apiOptions);
-			$result = $sock->fetch_parsed_body();
-			request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', $apiCmd, $apiOptions, $result, $serviceClass->getId());
-			myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+			$result = $users->findOne(['username' => $username]);
+			if (is_null($result)) {
+				$result = $users->insertOne($data);
+				request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', 'insert', $data, $result, $serviceClass->getId());
+				myadmin_log('myadmin', 'info', 'ZoneMTA insert '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+				if ($result->getInsertedCount() == 0)
+				{
+					$event['success'] = false;
+					myadmin_log('zonemta', 'error', 'Error Creating User '.$username.' Site '.$hostname.' Text:'.$result['text'].' Details:'.$result['details'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					$event->stopPropagation();
+					return;
+				}
+			} else {
+				myadmin_log('myadmin', 'info', 'ZoneMTA found existing entry for '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+			}
 			$event->stopPropagation();
 		}
 	}
@@ -148,26 +154,12 @@ class Plugin
 		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			$serviceClass = $event->getSubject();
 			myadmin_log('myadmin', 'info', 'ZoneMTA Deactivation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
-			$settings = get_module_settings(self::$module);
-			if ($serviceClass->getServer() > 0) {
-				$serverdata = get_service_master($serviceClass->getServer(), self::$module);
-				$hash = $serverdata[$settings['PREFIX'].'_key'];
-				$ip = $serverdata[$settings['PREFIX'].'_ip'];
-				$server_ssl="Y";
-				$sock = new HTTPSocket;
-				$sock->connect(($server_ssl == 'Y' ? 'ssl://' : '').$ip, 2222);
-				$sock->set_login('admin',$hash);
-				$apiCmd = '/CMD_API_SELECT_USERS';
-				$apiOptions = [
-					'location' => 'CMD_SELECT_USERS',
-					'suspend' => 'Suspend',
-					'select0' => $serviceClass->getUsername()
-				];
-				$sock->query($apiCmd, $apiOptions);
-				$result = $sock->fetch_parsed_body();
-				request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', $apiCmd, $apiOptions, $result, $serviceClass->getId());
-				myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-			}
+			$client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
+			$users = $client->selectDatabase('zone-mta')->selectCollection('users');
+			$data = ['username' => $serviceClass->getUsername()];
+			$result = $users->deleteOne($data);
+			request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', 'delete', $data, $result, $serviceClass->getId());
+			myadmin_log('myadmin', 'info', 'ZoneMTA delete '.json_encode($data).' Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			$event->stopPropagation();
 		}
 	}
@@ -183,35 +175,14 @@ class Plugin
 		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			myadmin_log('myadmin', 'info', 'ZoneMTA Termination', __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			$settings = get_module_settings(self::$module);
-			$serverdata = get_service_master($serviceClass->getServer(), self::$module);
-			$hash = $serverdata[$settings['PREFIX'].'_key'];
-			$ip = $serverdata[$settings['PREFIX'].'_ip'];
-			if (trim($serviceClass->getUsername()) != '') {
-				$server_ssl="Y";
-				$sock = new HTTPSocket;
-				$sock->connect(($server_ssl == 'Y' ? 'ssl://' : '').$ip, 2222);
-				$sock->set_login('admin',$hash);
-				$apiCmd = '/CMD_API_SELECT_USERS';
-				$apiOptions = [
-					'confirmed' => 'Confirm',
-					'delete' => 'yes',
-					'select0' => $serviceClass->getUsername()
-				];
-				$sock->query($apiCmd, $apiOptions);
-				$result = $sock->fetch_parsed_body();
-				request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', $apiCmd, $apiOptions, $result, $serviceClass->getId());
-				myadmin_log('myadmin', 'info', 'ZoneMTA '.$apiCmd.' Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-			}
+			$client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
+			$users = $client->selectDatabase('zone-mta')->selectCollection('users');
+			$data = ['username' => $serviceClass->getUsername()];
+			$result = $users->deleteOne($data);
+			request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', 'delete', $data, $result, $serviceClass->getId());
+			myadmin_log('myadmin', 'info', 'ZoneMTA delete '.json_encode($data).' Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			$event->stopPropagation();
-			if (trim($serviceClass->getUsername()) == '') {
-				return true;
-			} elseif ($result['error'] == "0") {
-				return true;
-			} elseif ($result['text'] == "System user {$serviceClass->getUsername()} does not exist!") {
-				return true;
-			} else {
-				return false;
-			}
+			return true;
 		}
 	}
 
@@ -223,9 +194,10 @@ class Plugin
 		if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
 			$serviceClass = $event->getSubject();
 			$settings = get_module_settings(self::$module);
-			$zonemta = new ZoneMTA(FANTASTICO_USERNAME, FANTASTICO_PASSWORD);
+			$client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
+			$users = $client->selectDatabase('zone-mta')->selectCollection('users');
 			myadmin_log('myadmin', 'info', 'IP Change - (OLD:'.$serviceClass->getIp().") (NEW:{$event['newip']})", __LINE__, __FILE__, self::$module, $serviceClass->getId());
-			$result = $zonemta->editIp($serviceClass->getIp(), $event['newip']);
+			//$result = $zonemta->editIp($serviceClass->getIp(), $event['newip']);
 			if (isset($result['faultcode'])) {
 				myadmin_log('myadmin', 'error', 'ZoneMTA editIp('.$serviceClass->getIp().', '.$event['newip'].') returned Fault '.$result['faultcode'].': '.$result['fault'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
 				$event['status'] = 'error';
