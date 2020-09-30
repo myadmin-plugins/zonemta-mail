@@ -74,15 +74,20 @@ class Plugin
 				'username' => $username,
 				'password' => $password,
 			];
-			$result = $users->insertOne($data);
-			request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', 'insert', $data, $result, $serviceClass->getId());
-			myadmin_log('myadmin', 'info', 'ZoneMTA insert '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
-			if ($insertOneResult->getInsertedCount() == 0)
-			{
-				$event['success'] = false;
-				myadmin_log('zonemta', 'error', 'Error Creating User '.$username.' Site '.$hostname.' Text:'.$result['text'].' Details:'.$result['details'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
-				$event->stopPropagation();
-				return;
+			$result = $users->findOne(['username' => $username]);
+			if (is_null($result)) {
+				$result = $users->insertOne($data);
+				request_log(self::$module, $serviceClass->getCustid(), __FUNCTION__, 'zonemta', 'insert', $data, $result, $serviceClass->getId());
+				myadmin_log('myadmin', 'info', 'ZoneMTA insert '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+				if ($result->getInsertedCount() == 0)
+				{
+					$event['success'] = false;
+					myadmin_log('zonemta', 'error', 'Error Creating User '.$username.' Site '.$hostname.' Text:'.$result['text'].' Details:'.$result['details'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
+					$event->stopPropagation();
+					return;
+				}
+			} else {
+				myadmin_log('myadmin', 'info', 'ZoneMTA found existing entry for '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
 			}
 			/* if ($serviceTypes[$serviceClass->getType()]['services_field2'] != '') {
 				$fields = explode(',', $serviceTypes[$serviceClass->getType()]['services_field2']);
