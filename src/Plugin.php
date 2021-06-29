@@ -243,6 +243,7 @@ class Plugin
 		$settings->setTarget('global');
 		$settings->add_dropdown_setting(self::$module, _('Out of Stock'), 'outofstock_mail_zonemta', _('Out Of Stock ZoneMTA Mail'), _('Enable/Disable Sales Of This Type'), $settings->get_setting('OUTOFSTOCK_MAIL_ZONEMTA'), ['0', '1'], ['No', 'Yes']);
 		$settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_host', _('ZoneMTA Host'), _('ZoneMTA Host'), $settings->get_setting('ZONEMTA_HOST'));
+		$settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_host2', _('ZoneMTA Host2'), _('ZoneMTA Host2'), $settings->get_setting('ZONEMTA_HOST2'));
 		$settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_username', _('ZoneMTA Username'), _('ZoneMTA Username'), $settings->get_setting('ZONEMTA_USERNAME'));
 		$settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_password', _('ZoneMTA Password'), _('ZoneMTA Password'), $settings->get_setting('ZONEMTA_PASSWORD'));
 		$settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_host', _('ZoneMTA MySQL Host'), _('ZoneMTA MySQL Host'), $settings->get_setting('ZONEMTA_MYSQL_HOST'));
