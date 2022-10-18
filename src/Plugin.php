@@ -87,6 +87,13 @@ class Plugin
                 }
             } else {
                 myadmin_log('myadmin', 'info', 'ZoneMTA found existing entry for '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                if ($result['password'] != $password) {
+                    myadmin_log('myadmin', 'info', 'ZoneMTA updating user '.$username.' password to '.$password, __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                    $updateResult = $users->updateOne(
+                        ['username' => $username],
+                        ['$set' => ['password' => $password]]
+                    );
+                }
             }
             /* if ($serviceTypes[$serviceClass->getType()]['services_field2'] != '') {
                 $fields = explode(',', $serviceTypes[$serviceClass->getType()]['services_field2']);
@@ -138,6 +145,13 @@ class Plugin
                 }
             } else {
                 myadmin_log('myadmin', 'info', 'ZoneMTA found existing entry for '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                if ($result['password'] != $password) {
+                    myadmin_log('myadmin', 'info', 'ZoneMTA updating user '.$username.' password to '.$password, __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                    $updateResult = $users->updateOne(
+                        ['username' => $username],
+                        ['$set' => ['password' => $password]]
+                    );
+                }
             }
             $event->stopPropagation();
         }
