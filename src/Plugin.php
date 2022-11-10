@@ -257,11 +257,11 @@ class Plugin
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_host', _('ZoneMTA Host'), _('ZoneMTA Host'), $settings->get_setting('ZONEMTA_HOST'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_host2', _('ZoneMTA Host2'), _('ZoneMTA Host2'), $settings->get_setting('ZONEMTA_HOST2'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_username', _('ZoneMTA Username'), _('ZoneMTA Username'), $settings->get_setting('ZONEMTA_USERNAME'));
-        $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_password', _('ZoneMTA Password'), _('ZoneMTA Password'), $settings->get_setting('ZONEMTA_PASSWORD'));
+        $settings->add_password_setting(self::$module, _('ZoneMTA'), 'zonemta_password', _('ZoneMTA Password'), _('ZoneMTA Password'), $settings->get_setting('ZONEMTA_PASSWORD'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_host', _('ZoneMTA MySQL Host'), _('ZoneMTA MySQL Host'), $settings->get_setting('ZONEMTA_MYSQL_HOST'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_port', _('ZoneMTA MySQL Port'), _('ZoneMTA MySQL Port'), $settings->get_setting('ZONEMTA_MYSQL_PORT'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_db', _('ZoneMTA MySQL DB'), _('ZoneMTA MySQL DB'), $settings->get_setting('ZONEMTA_MYSQL_DB'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_username', _('ZoneMTA MySQL Username'), _('ZoneMTA MySQL Username'), $settings->get_setting('ZONEMTA_MYSQL_USERNAME'));
-        $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_password', _('ZoneMTA MySQL Password'), _('ZoneMTA MySQL Password'), $settings->get_setting('ZONEMTA_MYSQL_PASSWORD'));
+        $settings->add_password_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_password', _('ZoneMTA MySQL Password'), _('ZoneMTA MySQL Password'), $settings->get_setting('ZONEMTA_MYSQL_PASSWORD'));
     }
 }
