@@ -254,6 +254,8 @@ class Plugin
         $settings = $event->getSubject();
         $settings->setTarget('global');
         $settings->add_dropdown_setting(self::$module, _('Out of Stock'), 'outofstock_mail_zonemta', _('Out Of Stock ZoneMTA Mail'), _('Enable/Disable Sales Of This Type'), $settings->get_setting('OUTOFSTOCK_MAIL_ZONEMTA'), ['0', '1'], ['No', 'Yes']);
+        $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_clickhouse_host', _('ZoneMTA ClickHouse Host'), _('ZoneMTA ClickHouse Host'), $settings->get_setting('ZONEMTA_CLICKHOUSE_HOST'));
+        $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_clickhouse_port', _('ZoneMTA ClickHouse Port'), _('ZoneMTA ClickHouse Port'), $settings->get_setting('ZONEMTA_CLICKHOUSE_PORT'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_host', _('ZoneMTA Host'), _('ZoneMTA Host'), $settings->get_setting('ZONEMTA_HOST'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_host2', _('ZoneMTA Host2'), _('ZoneMTA Host2'), $settings->get_setting('ZONEMTA_HOST2'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_username', _('ZoneMTA Username'), _('ZoneMTA Username'), $settings->get_setting('ZONEMTA_USERNAME'));
@@ -263,5 +265,10 @@ class Plugin
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_db', _('ZoneMTA MySQL DB'), _('ZoneMTA MySQL DB'), $settings->get_setting('ZONEMTA_MYSQL_DB'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_username', _('ZoneMTA MySQL Username'), _('ZoneMTA MySQL Username'), $settings->get_setting('ZONEMTA_MYSQL_USERNAME'));
         $settings->add_password_setting(self::$module, _('ZoneMTA'), 'zonemta_mysql_password', _('ZoneMTA MySQL Password'), _('ZoneMTA MySQL Password'), $settings->get_setting('ZONEMTA_MYSQL_PASSWORD'));
+        $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_rspamd_mysql_host', _('ZoneMTA rSPAMd MySQLHost'), _('ZoneMTA rSPAMd MySQLHost'), $settings->get_setting('ZONEMTA_RSPAMD_MYSQL_HOST'));
+        $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_rspamd_mysql_port', _('ZoneMTA rSPAMd MySQLPort'), _('ZoneMTA rSPAMd MySQLPort'), $settings->get_setting('ZONEMTA_RSPAMD_MYSQL_PORT'));
+        $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_rspamd_mysql_db', _('ZoneMTA rSPAMd MySQLDB'), _('ZoneMTA rSPAMd MySQLDB'), $settings->get_setting('ZONEMTA_RSPAMD_MYSQL_DB'));
+        $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_rspamd_mysql_username', _('ZoneMTA rSPAMd MySQLUsername'), _('ZoneMTA rSPAMd MySQLUsername'), $settings->get_setting('ZONEMTA_RSPAMD_MYSQL_USERNAME'));
+        $settings->add_password_setting(self::$module, _('ZoneMTA'), 'zonemta_rspamd_mysql_password', _('ZoneMTA rSPAMd MySQLPassword'), _('ZoneMTA rSPAMd MySQLPassword'), $settings->get_setting('ZONEMTA_RSPAMD_MYSQL_PASSWORD'));
     }
 }
