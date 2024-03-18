@@ -66,7 +66,7 @@ class Plugin
             $settings = get_module_settings(self::$module);
             $extra = run_event('parse_service_extra', $serviceClass->getExtra(), self::$module);
             //$serverdata = get_service_master($serviceClass->getServer(), self::$module);
-            $password = mail_get_password($serviceClass->getId());
+            $password = mail_get_password($serviceClass->getId(), $serviceClass->getCustid());
             $username = 'mb'.$serviceClass->getId();
             $client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
             $users = $client->selectDatabase('zone-mta')->selectCollection('users');
@@ -125,7 +125,7 @@ class Plugin
             $serviceClass = $event->getSubject();
             $settings = get_module_settings(self::$module);
             $username = $serviceClass->getUsername() == '' ? 'mb'.$serviceClass->getId() : $serviceClass->getUsername();
-            $password = mail_get_password($serviceClass->getId());
+            $password = mail_get_password($serviceClass->getId(), $serviceClass->getCustid());
             $client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
             $users = $client->selectDatabase('zone-mta')->selectCollection('users');
             $data = [
