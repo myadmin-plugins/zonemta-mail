@@ -59,7 +59,8 @@ class Plugin
      */
     public static function getActivate(GenericEvent $event)
     {
-        if (in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
+        $continue = false;
+        if ($continue && in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
             $serviceClass = $event->getSubject();
             myadmin_log('myadmin', 'info', 'ZoneMTA Activation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
             $serviceTypes = run_event('get_service_types', false, self::$module);
@@ -115,9 +116,9 @@ class Plugin
             $username = $db->real_escape($username);
             $db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_username='{$username}' where {$settings['PREFIX']}_id='{$serviceClass->getId()}'", __LINE__, __FILE__);
             mail_welcome_email($serviceClass->getId());
-            $event['success'] = true;
-            $event->stopPropagation();
         }
+        $event['success'] = true;
+        $event->stopPropagation();
     }
 
     /**
