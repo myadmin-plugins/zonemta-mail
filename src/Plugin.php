@@ -67,6 +67,11 @@ class Plugin
             $extra = run_event('parse_service_extra', $serviceClass->getExtra(), self::$module);
             //$serverdata = get_service_master($serviceClass->getServer(), self::$module);
             $password = mail_get_password($serviceClass->getId(), $serviceClass->getCustid());
+            if ($password === false || trim($password) == '') {
+                function_requirements('generate_password');
+                $password = generate_password(20, 'lud');
+            }
+            $GLOBALS['tf']->history->add($settings['PREFIX'], 'password', $serviceClass->getId(), $password);            
             $username = 'mb'.$serviceClass->getId();
             $client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
             $users = $client->selectDatabase('zone-mta')->selectCollection('users');
@@ -126,6 +131,11 @@ class Plugin
             $settings = get_module_settings(self::$module);
             $username = $serviceClass->getUsername() == '' ? 'mb'.$serviceClass->getId() : $serviceClass->getUsername();
             $password = mail_get_password($serviceClass->getId(), $serviceClass->getCustid());
+            if ($password === false || trim($password) == '') {
+                function_requirements('generate_password');
+                $password = generate_password(20, 'lud');
+            }
+            $GLOBALS['tf']->history->add($settings['PREFIX'], 'password', $serviceClass->getId(), $password);            
             $client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
             $users = $client->selectDatabase('zone-mta')->selectCollection('users');
             $data = [
