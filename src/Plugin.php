@@ -285,6 +285,6 @@ class Plugin
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_rspamd_mysql_db', _('ZoneMTA rSPAMd MySQLDB'), _('ZoneMTA rSPAMd MySQLDB'), $settings->get_setting('ZONEMTA_RSPAMD_MYSQL_DB'));
         $settings->add_text_setting(self::$module, _('ZoneMTA'), 'zonemta_rspamd_mysql_username', _('ZoneMTA rSPAMd MySQLUsername'), _('ZoneMTA rSPAMd MySQLUsername'), $settings->get_setting('ZONEMTA_RSPAMD_MYSQL_USERNAME'));
         $settings->add_password_setting(self::$module, _('ZoneMTA'), 'zonemta_rspamd_mysql_password', _('ZoneMTA rSPAMd MySQLPassword'), _('ZoneMTA rSPAMd MySQLPassword'), $settings->get_setting('ZONEMTA_RSPAMD_MYSQL_PASSWORD'));
-        $settings->add_password_setting(self::$module, _('MXToolBox'), 'mx_toolbox_auth_key', _('MXToolBox API Auth Key'), '', MXTOOLBOX_AUTH_TOKEN);
+        $settings->add_password_setting(self::$module, _('MXToolBox'), 'mxtoolbox_auth_token', _('MXToolBox API Auth Key'), '', MXTOOLBOX_AUTH_TOKEN);
     }
 }
