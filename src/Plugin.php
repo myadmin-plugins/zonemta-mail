@@ -59,7 +59,6 @@ class Plugin
      */
     public static function getActivate(GenericEvent $event)
     {
-        $continue = false;
         if ($continue && in_array($event['type'], [get_service_define('MAIL_ZONEMTA')])) {
             $serviceClass = $event->getSubject();
             myadmin_log('myadmin', 'info', 'ZoneMTA Activation', __LINE__, __FILE__, self::$module, $serviceClass->getId());
