@@ -1,40 +1,44 @@
 {
 	"name": "detain/myadmin-zonemta-mail",
 	"type": "myadmin-plugin",
-	"description": "ZoneMTA Storage Class",
+	"description": "MyAdmin ZoneMTA Mail plugin providing ZoneMTA-based mail service provisioning, lifecycle management, and MongoDB user account integration for the MyAdmin multi-service hosting platform.",
 	"keywords": [
-		"directadmin",
-		"administration",
-		"storage"
+		"zonemta",
+		"mail",
+		"myadmin",
+		"plugin",
+		"smtp",
+		"mongodb",
+		"provisioning"
 	],
 	"license": "LGPL-2.1-only",
 	"authors": [
 		{
 			"name": "Joe Huss",
-			"homepage": "https:\/\/my.interserver.net\/"
+			"homepage": "https://my.interserver.net/"
 		}
 	],
 	"config": {
-		"bin-dir": "vendor\/bin",
+		"bin-dir": "vendor/bin",
 		"minimum-stability": "dev"
 	},
 	"require": {
-		"php": ">=5.0.0",
+		"php": ">=8.2",
 		"ext-curl": "*",
 		"symfony/event-dispatcher": "^5.0@stable",
 		"detain/myadmin-plugin-installer": "dev-master"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "*",
-		"phpunit/phpunit-mock-objects": "*",
-		"vlucas/phpdotenv": "*",
-		"codeclimate/php-test-reporter": "dev-master",
-		"satooshi/php-coveralls": "*",
-		"codacy/coverage": "dev-master"
+		"phpunit/phpunit": "^9.6"
 	},
 	"autoload": {
 		"psr-4": {
 			"Detain\\MyAdminZoneMTAMail\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Detain\\MyAdminZoneMTAMail\\Tests\\": "tests/"
 		}
 	}
 }
