@@ -1,1 +1,4 @@
 .phpunit.cache
+
+# Caliber local state
+.caliber/
