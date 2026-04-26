@@ -55,8 +55,9 @@ if (!defined('MXTOOLBOX_AUTH_TOKEN')) {
     define('MXTOOLBOX_AUTH_TOKEN', 'test_token');
 }
 
-// Set up $GLOBALS['tf'] stub so vendor get_service_define() works
-$GLOBALS['tf'] = new class {
+// Set up an App-container-bound tf stub so MyAdmin\App::tf()
+// (and via that, get_service_define()) works in this test suite.
+$tfStub = new class {
     /** @var object */
     public object $history;
 
@@ -77,6 +78,14 @@ $GLOBALS['tf'] = new class {
         return $defines[$name] ?? 0;
     }
 };
+
+if (class_exists(\MyAdmin\App\Testing\TestContainerBuilder::class)) {
+    \MyAdmin\App::setContainer(
+        \MyAdmin\App\Testing\TestContainerBuilder::make()
+            ->withTf($tfStub)
+            ->build()
+    );
+}
 
 // Stub global functions the plugin calls
 
