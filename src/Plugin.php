@@ -71,7 +71,7 @@ class Plugin
                 function_requirements('generate_password');
                 $password = generate_password(20, 'lud');
             }
-            $GLOBALS['tf']->history->add($settings['PREFIX'], 'password', $serviceClass->getId(), $password);            
+            \MyAdmin\App::history()->add($settings['PREFIX'], 'password', $serviceClass->getId(), $password);            
             $username = 'mb'.$serviceClass->getId();
             $client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
             $users = $client->selectDatabase('zone-mta')->selectCollection('users');
@@ -135,7 +135,7 @@ class Plugin
                 function_requirements('generate_password');
                 $password = generate_password(20, 'lud');
             }
-            $GLOBALS['tf']->history->add($settings['PREFIX'], 'password', $serviceClass->getId(), $password);            
+            \MyAdmin\App::history()->add($settings['PREFIX'], 'password', $serviceClass->getId(), $password);            
             $client = new \MongoDB\Client('mongodb://'.ZONEMTA_USERNAME.':'.rawurlencode(ZONEMTA_PASSWORD).'@'.ZONEMTA_HOST.':27017/');
             $users = $client->selectDatabase('zone-mta')->selectCollection('users');
             $data = [
@@ -229,7 +229,7 @@ class Plugin
                 $event['status'] = 'error';
                 $event['status_text'] = 'Error Code '.$result['faultcode'].': '.$result['fault'];
             } else {
-                $GLOBALS['tf']->history->add($settings['TABLE'], 'change_ip', $event['newip'], $serviceClass->getId(), $serviceClass->getCustid());
+                \MyAdmin\App::history()->add($settings['TABLE'], 'change_ip', $event['newip'], $serviceClass->getId(), $serviceClass->getCustid());
                 $serviceClass->set_ip($event['newip'])->save();
                 $event['status'] = 'ok';
                 $event['status_text'] = 'The IP Address has been changed.';
