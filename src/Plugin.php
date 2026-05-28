@@ -86,7 +86,8 @@ class Plugin
                 myadmin_log('myadmin', 'info', 'ZoneMTA insert '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
                 if ($result->getInsertedCount() == 0) {
                     $event['success'] = false;
-                    myadmin_log('zonemta', 'error', 'Error Creating User '.$username.' Site '.$hostname.' Text:'.$result['text'].' Details:'.$result['details'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                    myadmin_log('zonemta', 'error', 'Error Creating User '.$username.' - MongoDB insertOne returned 0 inserted rows. Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                    chatNotify('Failed [Mail '.$serviceClass->getId().'](https://my.interserver.net/admin/view_mail?id='.$serviceClass->getId().') ZoneMTA Activation User:'.$username.' - MongoDB insertOne returned 0 inserted rows. Response: '.json_encode($result), 'notifications');
                     $event->stopPropagation();
                     return;
                 }
@@ -149,7 +150,8 @@ class Plugin
                 myadmin_log('myadmin', 'info', 'ZoneMTA insert '.json_encode($data).' : '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
                 if ($result->getInsertedCount() == 0) {
                     $event['success'] = false;
-                    myadmin_log('zonemta', 'error', 'Error Creating User '.$username.' Site '.$hostname.' Text:'.$result['text'].' Details:'.$result['details'], __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                    myadmin_log('zonemta', 'error', 'Error Creating User '.$username.' - MongoDB insertOne returned 0 inserted rows on reactivate. Response: '.json_encode($result), __LINE__, __FILE__, self::$module, $serviceClass->getId());
+                    chatNotify('Failed [Mail '.$serviceClass->getId().'](https://my.interserver.net/admin/view_mail?id='.$serviceClass->getId().') ZoneMTA Reactivation User:'.$username.' - MongoDB insertOne returned 0 inserted rows. Response: '.json_encode($result), 'notifications');
                     $event->stopPropagation();
                     return;
                 }
