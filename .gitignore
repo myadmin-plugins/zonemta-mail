@@ -1,4 +1,6 @@
 .phpunit.cache
+composer.lock
+vendor/
 
 # Caliber local state
 .caliber/

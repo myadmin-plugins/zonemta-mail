@@ -38,6 +38,12 @@ if (!$autoloaderFound) {
     });
 }
 
+// Namespace-level stubs that shadow the plugin-installer's real global helpers
+// for Plugin.php's own unqualified call sites. Must come after the autoloader so
+// the functions it defines are already visible for the comparison documented in
+// tests/stubs.php.
+require_once __DIR__ . '/stubs.php';
+
 // Suppress deprecation/notice noise for cleaner test output
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE & ~E_WARNING);
 
@@ -87,7 +93,15 @@ if (class_exists(\MyAdmin\App\Testing\TestContainerBuilder::class)) {
     );
 }
 
-// Stub global functions the plugin calls
+// Stub global functions the plugin calls.
+//
+// NOTE: only functions that nothing else defines can be stubbed here. Composer
+// autoloads detain/myadmin-plugin-installer's src/modules.php and
+// src/function_requirements.php as `files`, which already define the real global
+// get_service_define(), get_module_settings(), get_module_db() and
+// function_requirements() by the time this runs -- so the guards below are false
+// for those four and their stubs never take effect. Namespaced replacements that
+// do take effect live in tests/stubs.php; see the comment there.
 
 if (!function_exists('myadmin_log')) {
     function myadmin_log($section, $level, $message, $line = '', $file = '', $module = '', $id = '') {
