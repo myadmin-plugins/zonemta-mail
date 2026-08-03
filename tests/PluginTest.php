@@ -630,17 +630,30 @@ class PluginTest extends TestCase
     // -------------------------------------------------------------------------
 
     /**
-     * Test that getActivate sets success and stops propagation for non-matching type.
+     * Test that getActivate leaves a non-ZoneMTA activation entirely alone.
+     *
+     * This asserts the type guard, not just the absence of a crash. Until
+     * 2026-08-03 the success flag and stopPropagation() sat *outside* the
+     * `in_array($event['type'], ...)` guard, so activating any other mail type
+     * was reported as a successful ZoneMTA activation and the dispatch chain was
+     * halted before any other mail plugin could handle it. That was invisible in
+     * production only because ZoneMTA is currently the sole registered
+     * mail.activate handler; a second one would have silently never run.
      *
      * @return void
      */
-    public function testGetActivateWithNonMatchingTypeStillSetSuccess(): void
+    public function testGetActivateWithNonMatchingTypeDoesNotClaimSuccess(): void
     {
         $event = new GenericEvent(null, ['type' => 999]);
         Plugin::getActivate($event);
-        // The method sets success=true and stops propagation at the end regardless
-        $this->assertTrue($event['success']);
-        $this->assertTrue($event->isPropagationStopped());
+        $this->assertFalse(
+            $event->hasArgument('success'),
+            'a foreign mail type must not be reported as activated'
+        );
+        $this->assertFalse(
+            $event->isPropagationStopped(),
+            'a foreign mail type must stay available to the next mail.activate handler'
+        );
     }
 
     /**

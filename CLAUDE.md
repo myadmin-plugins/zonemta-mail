@@ -67,7 +67,7 @@ $db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_username='{$us
 - `get_module_settings(self::$module)` returns `['PREFIX' => 'mail', 'TABLE' => 'mail', ...]`
 - Password flow: `mail_get_password($id, $custid)` → fallback `generate_password('lud')`
 - After activate/reactivate: call `mail_welcome_email($serviceClass->getId())`
-- `getActivate` always sets `$event['success'] = true` and stops propagation at end
+- `getActivate` sets `$event['success'] = true` and stops propagation at the end **of the `MAIL_ZONEMTA` type guard** — never for a foreign mail type
 - Test stubs live in `tests/bootstrap.php` — defines `ZONEMTA_*` constants, `get_module_db`, `myadmin_log`, etc.
 
 <!-- caliber:managed:pre-commit -->

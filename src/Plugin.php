@@ -116,9 +116,9 @@ class Plugin
             $username = $db->real_escape($username);
             $db->query("update {$settings['TABLE']} set {$settings['PREFIX']}_username='{$username}' where {$settings['PREFIX']}_id='{$serviceClass->getId()}'", __LINE__, __FILE__);
             mail_welcome_email($serviceClass->getId());
+            $event['success'] = true;
+            $event->stopPropagation();
         }
-        $event['success'] = true;
-        $event->stopPropagation();
     }
 
     /**
