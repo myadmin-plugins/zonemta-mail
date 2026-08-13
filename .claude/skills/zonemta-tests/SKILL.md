@@ -1,6 +1,6 @@
 ---
 name: zonemta-tests
-description: Adds PHPUnit tests in `tests/PluginTest.php` following reflection-based and source-inspection patterns. Use when user says 'add test', 'write unit test', 'test this method', or adds coverage for `src/Plugin.php`. Covers ReflectionClass method inspection, GenericEvent stubs, anonymous-class settings stubs, and getMethodSource() assertions. Do NOT use for modifying `tests/bootstrap.php` stubs or adding new global function stubs. NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Adds PHPUnit tests in `tests/PluginTest.php` following reflection-based and source-inspection patterns. Use when user says 'add test', 'write unit test', 'test this method', or adds coverage for `src/Plugin.php`. Covers ReflectionClass method inspection, GenericEvent stubs, anonymous-class settings stubs, and getMethodSource() assertions. Do NOT use for modifying `tests/bootstrap.php` stubs or adding new global function stubs. For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file

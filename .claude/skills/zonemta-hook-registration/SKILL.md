@@ -1,6 +1,6 @@
 ---
 name: zonemta-hook-registration
-description: Adds or modifies hook registrations in getHooks() in src/Plugin.php and adds the corresponding static method stub. Use when user says 'add hook', 'register event', 'new event handler', or adds entries to the getHooks() return array. Covers the module.event key format and [__CLASS__, 'methodName'] handler syntax. Do NOT use for implementing handler logic (MongoDB ops, MySQL updates, etc.). NOTE: for a plugin's contract/behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
+description: Adds or modifies hook registrations in getHooks() in src/Plugin.php and adds the corresponding static method stub. Use when user says 'add hook', 'register event', 'new event handler', or adds entries to the getHooks() return array. Covers the module.event key format and [__CLASS__, 'methodName'] handler syntax. Do NOT use for implementing handler logic (MongoDB ops, MySQL updates, etc.). For a plugin's contract or behavioral tests (tests/ContractTest.php, the shared harness, composer myadmin:scaffold-tests) use the plugin-contract-tests skill instead — this skill's reflection-only guidance predates that harness.
 ---
 <!-- myadmin-contract-harness-notice -->
 > ### ⚠️ Read this before the rest of the file
